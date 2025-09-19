@@ -2,7 +2,7 @@ import config from "../backend/config";
 import backapi from "../backend/backapi";
 import {isFirefox, localGet, localSave, newNotification, syncGet, syncSave} from "@/common/chrome";
 import {isEmpty, sleep} from "@/common/utils";
-import {addTask, compileTask, getTasks, runTask, setTask} from "@/backend/utils";
+import {addTask, checkTask, compileTask, getTasks, runTask, setTask} from "@/backend/utils";
 import compareVersions from "compare-versions";
 
 chrome.runtime.onMessage.addListener(function (info, sender, cb) {
@@ -87,7 +87,7 @@ async function loop() {
 				changed = true;
 				let ok = false;
 				try {
-					ok = await race(task.check(task._params));
+					ok = await race(checkTask(task));
 				} catch (err) {
 					// if (/Network Error|timeout/.test(err)) return; // 网络中断时
 					task.result = err + "";
