@@ -168,87 +168,67 @@
 			title="历史记录详情"
 			scrollable
 			class="history-detail-dialog"
-			max-width="600px"
+			max-width="700px"
 		>
 			<div v-if="selectedRecord" class="history-detail-content">
-				<mu-list>
-					<mu-list-item>
-						<mu-list-item-content>
-							<mu-list-item-title>任务名称</mu-list-item-title>
-							<mu-list-item-sub-title>{{ selectedRecord.taskName }}</mu-list-item-sub-title>
-						</mu-list-item-content>
-					</mu-list-item>
-					<mu-list-item>
-						<mu-list-item-content>
-							<mu-list-item-title>操作类型</mu-list-item-title>
-							<mu-list-item-sub-title>{{
-								selectedRecord.type === "run" ? "签到执行" : "登录检查"
-							}}</mu-list-item-sub-title>
-						</mu-list-item-content>
-					</mu-list-item>
-					<mu-list-item>
-						<mu-list-item-content>
-							<mu-list-item-title>执行时间</mu-list-item-title>
-							<mu-list-item-sub-title>{{
-								new Date(selectedRecord.timestamp).toLocaleString()
-							}}</mu-list-item-sub-title>
-						</mu-list-item-content>
-					</mu-list-item>
-					<mu-list-item>
-						<mu-list-item-content>
-							<mu-list-item-title>执行状态</mu-list-item-title>
-							<mu-list-item-sub-title>
+				<!-- 基本信息 -->
+				<div class="detail-section">
+					<h4 class="section-title">基本信息</h4>
+					<div class="info-grid">
+						<div class="info-item">
+							<span class="info-label">任务名称：</span>
+							<span class="info-value">{{ selectedRecord.taskName }}</span>
+						</div>
+						<div class="info-item">
+							<span class="info-label">操作类型：</span>
+							<span class="info-value">{{ selectedRecord.type === "run" ? "签到执行" : "登录检查" }}</span>
+						</div>
+						<div class="info-item">
+							<span class="info-label">执行时间：</span>
+							<span class="info-value">{{ new Date(selectedRecord.timestamp).toLocaleString() }}</span>
+						</div>
+						<div class="info-item">
+							<span class="info-label">执行状态：</span>
+							<span class="info-value">
 								<mu-chip :color="selectedRecord.success ? 'success' : 'error'" size="small">
 									{{ selectedRecord.success ? "成功" : "失败" }}
 								</mu-chip>
-							</mu-list-item-sub-title>
-						</mu-list-item-content>
-					</mu-list-item>
-					<mu-list-item>
-						<mu-list-item-content>
-							<mu-list-item-title>耗时</mu-list-item-title>
-							<mu-list-item-sub-title>{{ selectedRecord.duration }}ms</mu-list-item-sub-title>
-						</mu-list-item-content>
-					</mu-list-item>
-					<mu-list-item>
-						<mu-list-item-content>
-							<mu-list-item-title>执行结果</mu-list-item-title>
-							<mu-list-item-sub-title>
-								<pre class="result-detail">{{ selectedRecord.result }}</pre>
-							</mu-list-item-sub-title>
-						</mu-list-item-content>
-					</mu-list-item>
-					<mu-list-item v-if="selectedRecord.logs && selectedRecord.logs.length">
-						<mu-list-item-content>
-							<mu-list-item-title>执行日志</mu-list-item-title>
-							<mu-list-item-sub-title>
-								<div class="logs-container">
-									<div v-for="(log, index) in selectedRecord.logs" :key="index" class="log-item">
-										{{ log }}
-									</div>
-								</div>
-							</mu-list-item-sub-title>
-						</mu-list-item-content>
-					</mu-list-item>
-					<mu-list-item v-if="selectedRecord.error">
-						<mu-list-item-content>
-							<mu-list-item-title>错误信息</mu-list-item-title>
-							<mu-list-item-sub-title>
-								<pre class="error-detail">{{ selectedRecord.error }}</pre>
-							</mu-list-item-sub-title>
-						</mu-list-item-content>
-					</mu-list-item>
-					<mu-list-item v-if="selectedRecord.params">
-						<mu-list-item-content>
-							<mu-list-item-title>执行参数</mu-list-item-title>
-							<mu-list-item-sub-title>
-								<pre class="params-detail">{{
-									JSON.stringify(selectedRecord.params, null, 2)
-								}}</pre>
-							</mu-list-item-sub-title>
-						</mu-list-item-content>
-					</mu-list-item>
-				</mu-list>
+							</span>
+						</div>
+						<div class="info-item">
+							<span class="info-label">耗时：</span>
+							<span class="info-value">{{ selectedRecord.duration }}ms</span>
+						</div>
+					</div>
+				</div>
+
+				<!-- 执行结果 -->
+				<div class="detail-section">
+					<h4 class="section-title">执行结果</h4>
+					<div class="content-box result-detail">{{ selectedRecord.result }}</div>
+				</div>
+
+				<!-- 执行日志 -->
+				<div v-if="selectedRecord.logs && selectedRecord.logs.length" class="detail-section">
+					<h4 class="section-title">执行日志</h4>
+					<div class="content-box logs-container">
+						<div v-for="(log, index) in selectedRecord.logs" :key="index" class="log-item">
+							{{ log }}
+						</div>
+					</div>
+				</div>
+
+				<!-- 错误信息 -->
+				<div v-if="selectedRecord.error" class="detail-section">
+					<h4 class="section-title">错误信息</h4>
+					<div class="content-box error-detail">{{ selectedRecord.error }}</div>
+				</div>
+
+				<!-- 执行参数 -->
+				<div v-if="selectedRecord.params" class="detail-section">
+					<h4 class="section-title">执行参数</h4>
+					<div class="content-box params-detail">{{ JSON.stringify(selectedRecord.params, null, 2) }}</div>
+				</div>
 			</div>
 			<mu-button slot="actions" flat @click="detailDialog = false">关闭</mu-button>
 		</mu-dialog>
@@ -546,68 +526,148 @@ export default {
 	margin-top: 24px;
 }
 
-.result-detail,
-.error-detail,
-.params-detail {
-	background: #f5f5f5;
-	padding: 8px;
-	border-radius: 4px;
+/* 详情对话框样式 */
+.history-detail-dialog .mu-dialog-body {
+	max-height: 80vh;
+	padding: 0;
+}
+
+.history-detail-content {
+	padding: 16px;
+	max-height: 75vh;
+	overflow-y: auto;
+}
+
+/* 详情区块样式 */
+.detail-section {
+	margin-bottom: 20px;
+	border-bottom: 1px solid #f0f0f0;
+	padding-bottom: 16px;
+}
+
+.detail-section:last-child {
+	border-bottom: none;
+	margin-bottom: 0;
+}
+
+.section-title {
+	margin: 0 0 12px 0;
+	font-size: 14px;
+	font-weight: 600;
+	color: #333;
+	border-left: 3px solid #2196f3;
+	padding-left: 8px;
+}
+
+/* 基本信息网格布局 */
+.info-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 12px;
+}
+
+.info-item {
+	display: flex;
+	align-items: center;
+	min-height: 32px;
+}
+
+.info-label {
+	font-weight: 500;
+	color: #666;
+	min-width: 80px;
+	flex-shrink: 0;
+}
+
+.info-value {
+	color: #333;
+	word-break: break-word;
+}
+
+/* 内容框样式 */
+.content-box {
+	background: #f8f9fa;
+	border: 1px solid #e9ecef;
+	border-radius: 6px;
+	padding: 12px;
+	font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+	font-size: 12px;
+	line-height: 1.5;
 	white-space: pre-wrap;
 	word-break: break-word;
-	max-height: 150px;
+	max-height: 200px;
 	overflow-y: auto;
-	font-size: 12px;
-	font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
-	line-height: 1.4;
-	border: 1px solid #e0e0e0;
+	position: relative;
 }
 
-.error-detail {
+.content-box.result-detail {
+	background: #f0f8ff;
+	border-color: #b3d9ff;
+}
+
+.content-box.error-detail {
 	background: #fff5f5;
-	color: #d32f2f;
 	border-color: #ffcdd2;
-	max-height: 120px;
+	color: #d32f2f;
 }
 
-.params-detail {
-	max-height: 100px;
-}
-
-.logs-container {
+.content-box.params-detail {
 	background: #f5f5f5;
-	padding: 8px;
-	border-radius: 4px;
+	border-color: #e0e0e0;
 	max-height: 150px;
-	overflow-y: auto;
-	border: 1px solid #e0e0e0;
+}
+
+.content-box.logs-container {
+	background: #fafafa;
+	border-color: #e0e0e0;
+	padding: 8px;
+	font-family: inherit;
+	white-space: normal;
 }
 
 .log-item {
 	font-size: 12px;
-	padding: 2px 0;
+	padding: 4px 0;
 	border-bottom: 1px solid #eee;
 	word-break: break-word;
+	font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
 }
 
 .log-item:last-child {
 	border-bottom: none;
 }
 
-/* 对话框样式优化 */
-.mu-dialog .mu-dialog-body {
-	max-height: 70vh;
-	overflow-y: auto;
+/* 滚动条样式优化 */
+.content-box::-webkit-scrollbar,
+.history-detail-content::-webkit-scrollbar {
+	width: 6px;
 }
 
-/* 详情对话框特殊样式 */
-.history-detail-dialog .mu-dialog-body {
-	max-height: 60vh;
-	padding: 0;
+.content-box::-webkit-scrollbar-track,
+.history-detail-content::-webkit-scrollbar-track {
+	background: #f1f1f1;
+	border-radius: 3px;
 }
 
-.history-detail-content {
-	max-height: 55vh;
-	overflow-y: auto;
-	padding: 16px;
+.content-box::-webkit-scrollbar-thumb,
+.history-detail-content::-webkit-scrollbar-thumb {
+	background: #c1c1c1;
+	border-radius: 3px;
+}
+
+.content-box::-webkit-scrollbar-thumb:hover,
+.history-detail-content::-webkit-scrollbar-thumb:hover {
+	background: #a8a8a8;
+}
+
+/* 响应式设计 */
+@media (max-width: 600px) {
+	.info-grid {
+		grid-template-columns: 1fr;
+	}
+	
+	.history-detail-dialog .mu-dialog {
+		max-width: 95vw !important;
+	}
 }
 </style>
