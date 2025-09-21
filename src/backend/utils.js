@@ -2,6 +2,7 @@ import {sleep} from "@/common/utils";
 import scriptbuild from "./scriptbuild";
 import compareVersions from "compare-versions";
 import {getManifest, localGet, localSave, syncGet, syncSave} from "@/common/chrome";
+import {addHistory} from "./history";
 
 export function fromNow(v, digits, def) {
 	digits = digits || 0;
@@ -244,22 +245,105 @@ export function delTask(name) {
 export async function runTask(task) {
 	if (typeof task === "string") task = await getTask(task);
 	let now = Date.now();
+	let startTime = now;
 	task.run_at = now;
 	task.cnt++;
+
+	const taskName = `${task.author}/${task.name}`;
+	const logs = [`开始签到 - ${new Date(now).toLocaleString()}`];
+
 	console.log(task.name, "开始签到");
+
+	let success = false;
+	let result = "";
+	let error = null;
+
 	try {
-		filTask(task, await task.run(task._params));
+		result = await task.run(task._params);
+		filTask(task, result);
 		task.success_at = now;
 		if (task.failure_at >= task.success_at) task.failure_at = 0;
 		task.ok++;
+		success = true;
+		logs.push(`签到成功 - 耗时${Date.now() - startTime}ms`);
 		console.log(task.name, "签到成功");
 	} catch (err) {
-		filTask(task, err || "失败");
+		error = err;
+		result = err || "失败";
+		filTask(task, result);
 		task.failure_at = now;
 		if (task.success_at >= task.failure_at) task.success_at = 0;
+		logs.push(`签到失败 - 错误: ${err}`);
 		console.error(task.name, "签到失败", err);
 	}
+
+	// 添加历史记录
+	try {
+		await addHistory(taskName, "run", success, result, {
+			duration: Date.now() - startTime,
+			logs,
+			params: task._params,
+			error,
+		});
+	} catch (historyErr) {
+		console.warn("添加签到历史记录失败:", historyErr);
+	}
+
 	return task;
+}
+
+/**
+ * 执行登录检查任务（带历史记录）
+ * @param {soulsign.Task} task - 任务对象
+ * @returns {Promise<boolean>} 是否在线
+ */
+export async function checkTask(task) {
+	const taskName = `${task.author}/${task.name}`;
+	const startTime = Date.now();
+	const logs = [`开始检查登录状态 - ${new Date(startTime).toLocaleString()}`];
+
+	let success = false;
+	let result = "";
+	let error = null;
+
+	try {
+		const isOnline = await task.check(task._params);
+		success = !!isOnline;
+		result = isOnline ? "在线" : "不在线";
+		logs.push(`检查完成 - 状态: ${result} - 耗时${Date.now() - startTime}ms`);
+
+		// 添加历史记录
+		try {
+			await addHistory(taskName, "check", success, result, {
+				duration: Date.now() - startTime,
+				logs,
+				params: task._params,
+				error,
+			});
+		} catch (historyErr) {
+			console.warn("添加登录检查历史记录失败:", historyErr);
+		}
+
+		return isOnline;
+	} catch (err) {
+		error = err;
+		result = `检查失败: ${err}`;
+		logs.push(`检查失败 - 错误: ${err}`);
+
+		// 添加历史记录
+		try {
+			await addHistory(taskName, "check", false, result, {
+				duration: Date.now() - startTime,
+				logs,
+				params: task._params,
+				error,
+			});
+		} catch (historyErr) {
+			console.warn("添加登录检查历史记录失败:", historyErr);
+		}
+
+		throw err;
+	}
 }
 
 /**

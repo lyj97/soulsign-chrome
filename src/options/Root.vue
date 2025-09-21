@@ -5,16 +5,18 @@
 				{{ manifest.name }}<small class="sup">{{ manifest.version }}</small>
 			</div>
 			<mu-button slot="right" flat @click="go('#cross')">跨域管理</mu-button>
+			<mu-button slot="right" flat @click="go('#history')">执行历史</mu-button>
 			<mu-button slot="right" flat @click="go('#')">脚本管理</mu-button>
-			<mu-button slot="right" flat @click="go('https://soulsign.inu1255.cn/', 1)"
-				>脚本推荐</mu-button
-			>
-			<mu-button slot="right" flat @click="go('https://github.com/inu1255/soulsign-chrome', 1)"
-				>源码</mu-button
-			>
+			<!--			<mu-button slot="right" flat @click="go('https://soulsign.inu1255.cn/', 1)"-->
+			<!--				>脚本推荐</mu-button-->
+			<!--			>-->
+			<!--			<mu-button slot="right" flat @click="go('https://github.com/inu1255/soulsign-chrome', 1)"-->
+			<!--				>源码</mu-button-->
+			<!--			>-->
 		</mu-appbar>
 		<br />
 		<Cross v-if="path == 'cross'"></Cross>
+		<History v-else-if="path == 'history'"></History>
 		<mu-container v-else style="margin-bottom: 245px">
 			<div class="tar head-tools">
 				<mu-button color="primary" @click="upload()">导入脚本</mu-button>
@@ -170,11 +172,12 @@
 </template>
 <script>
 import Cross from "./pages/Cross.vue";
+import History from "./pages/History.vue";
 import Preview from "./pages/Preview.vue";
 import Details from "./pages/Details.vue";
 import JSZip from "jszip";
 import {getManifest, localSave, sendMessage} from "@/common/chrome";
-import {compileTask, filTask, buildScript} from "@/backend/utils";
+import {buildScript, compileTask, filTask} from "@/backend/utils";
 import compareVersions from "compare-versions";
 import {download, format, pick, readFile} from "@/common/utils";
 import axios from "@/common/axios";
@@ -182,7 +185,6 @@ import axios from "@/common/axios";
 // import Prism Editor
 import {PrismEditor} from "vue-prism-editor";
 import "vue-prism-editor/dist/prismeditor.min.css"; // import the styles somewhere
-
 // import highlighting library (you can use any library you want just return html string)
 import {highlight, languages} from "prismjs/components/prism-core";
 import "prismjs/components/prism-clike";
@@ -204,6 +206,7 @@ export default {
 	components: {
 		Preview,
 		Cross,
+		History,
 		Details,
 		PrismEditor,
 	},
@@ -574,6 +577,7 @@ export default {
 			let hash = location.hash.slice(1);
 			let match = {};
 			if (hash == "cross") this.path = "cross";
+			else if (hash == "history") this.path = "history";
 			else this.path = "";
 			if ((match = hash.match(/details:([^;]+);(.*)/))) {
 				this.detail = {script: match[2], row: match[1]};
